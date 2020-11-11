@@ -18,17 +18,24 @@ public class QRtool {
     static WebDriver driver;
     public static void main(String[] args) {
         System.setProperty("webdriver.chrome.driver","D:\\学习\\chromedriver_win32\\chromedriver.exe");//chromedriver.exe存放位置
-        String url = "http://e.ecust.edu.cn/mh";
+        String url = "http://wjjw.cmjnu.com.cn/";
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.get(url);
         try {
+            File file = elementSnapshot(driver,url);
+            System.out.println(recognize(file));
+            FileUtils.copyFile(file, new File("hello.png"));//去目录下生成一个hello.png，查看结果
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        /*try {
             String result = recognize(elementSnapshot(driver,url));
             System.out.println(result);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        driver.quit();
+        driver.quit();*/
     }
 
     /**
@@ -37,34 +44,25 @@ public class QRtool {
      * @param driver
      * element  截图区域
      * @throws Exception
-     * http://wjjw.cmjnu.com.cn/  width = 40  height = 90
-     * http://e.ecust.edu.cn/myxsbm/myxsbm/index  width = 25 height = 70
-     * http://e.ecust.edu.cn/mh  width = 35  height = 100
      *
      */
     public static File elementSnapshot(WebDriver driver,String url) throws Exception {
         //获取元素的高度、宽度,适配不同网站的验证码元素
-        int width = 40;
-        int height = 100;
         WebElement element = null;
         if(url.equals("http://wjjw.cmjnu.com.cn/")){
             element = driver.findElement(By.className("login-code"));
-            width = 40;
-            height = 90;
         }else if(url.equals("http://e.ecust.edu.cn/myxsbm/myxsbm/index")){
             element = driver.findElement(By.id("codeImg"));
-            width = 25;
-            height = 70;
         }else if(url.equals("http://e.ecust.edu.cn/mh")){
             element = driver.findElement(By.id("validimage"));
-            width = 35;
-            height = 100;
         }
+        int width = element.getSize().getWidth();
+        int height = element.getSize().getHeight();
         //创建全屏截图
         File screen = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         BufferedImage image = ImageIO.read(screen);
         //创建一个矩形使用上面的高度，和宽度
-        Rectangle rect = new Rectangle(0,0,width,height);
+        Rectangle rect = new Rectangle(0,0,height,width);
         //元素坐标
         Point p = element.getLocation();
         //对前面的矩形进行操作
